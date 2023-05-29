@@ -5,9 +5,9 @@
 # Platform description
 ##
 
-namespace: example
-platformName: "Influenzanet Example"
-contactEmail: "support@example.com"
+namespace: coughwatchsa
+platformName: "CoughWatchSA"
+contactEmail: "support@coughwatchsa.org"
 
 ##
 # External access configuration
@@ -19,12 +19,10 @@ ingress:
   name: "ingress-web"
 
 # Replace this with the main domain name for Influenzanet Application
-domain: example.com
+domain: coughwatchsa.org
 
 # Additional domains to redirect to the main domain
-redirectDomains:
-  - app.{{ .Values.domain }}
-  - example.org
+redirectDomains: []
 
 # API endpoints
 participantApiPath: "/api"
@@ -36,8 +34,7 @@ managementApiPath: "/admin"
 
 # Additional domains to be included in the TLS certificate *in addition* to
 # 'domain' and 'redirectDomains'
-tlsDomains:
-  - www.{{ .Values.domain }}
+tlsDomains: []
 
 # TLS issuerType 'acme', 'ca'
 issuerType: "acme"
@@ -45,7 +42,7 @@ issuerType: "acme"
 # If issuerType: 'acme'
 clusterIssuer : "letsencrypt"
 acmeServer: https://acme-v02.api.letsencrypt.org/directory
-acmeEmail: admin@example.com
+acmeEmail: "{{ .Values.acmeEmail }}"
 # Name of the secret used to store the generated certificate
 tlsSecretName: 'site-tls-web'
 
@@ -58,10 +55,9 @@ CAIssuerSecretName: ''
 ##
 
 basicAuth:
-  enabled: false
-  username: "user"
-  password: "password"
-  excludePaths: []
+  enabled: true
+  excludePaths:
+    - '/assets/images'
 
 # Use Google Recaptcha for protecting the registration dialog from spammers, if
 # true the secret googleRecaptchaKey must also be defined
@@ -73,47 +69,29 @@ useRecaptcha: true
 
 ## Regular Email Server
 smtpServers:
-  from: "Influenzanet Example <no-reply@example.com>"
-  sender: "Influenzanet Example <no-reply@example.com>"
-  replyTo:
-    - no-reply@example.com
+  from: "{{ .Values.smtpEmail }}"
+  sender: "{{ .Values.smtpEmail }}"
   servers:
-    - host: smtp.example.com
-      port: 465
+    - host: smtp.eu.mailgun.org
+      port: 587
       connections: 2
       sendTimeout: 5
       auth:
-        user: postmaster@example.com
-        password: "password"
+        user: "{{ .Values.smtpUser }}"
+        password: "{{ .Values.smtpPassword }}"
 
 ## High Priority email server
 prioSmtpServers:
-  from: "Influenzanet Example <no-reply@example.com>"
-  sender: "Influenzanet Example <no-reply@example.com>"
-  replyTo:
-    - no-reply@example.com
+  from: "{{ .Values.smtpEmail }}"
+  sender: "{{ .Values.smtpEmail }}"
   servers:
-    - host: smtp.example.com
-      port: 465
+    - host: smtp.eu.mailgun.org
+      port: 587
       connections: 2
       sendTimeout: 5
       auth:
-        user: postmaster@example.com
-        password: "password"
-
-##
-# Platform secrets
-##
-
-jwtKey: "high_entropy_string"
-mongoUsername: "user"
-mongoPassword: "password"
-# The actual secret key value provided by Google is expected here
-googleRecaptchaKey: "google_recaptcha_key"
-# studyGlobalSecret is used together with the secretKey associated to a specific
-# study to compute a participantID from a profileID, should be a string with
-# high entropy
-studyGlobalSecret: "high_entropy_string"
+        user: "{{ .Values.smtpUser }}"
+        password: "{{ .Values.smtpPassword }}"
 
 ##
 # MongoDB service configuration
@@ -165,7 +143,7 @@ dbSecretName: "case-mongodb-atlas"
 svcWebParticipant:
     name: web-client
     replicas: 1
-    image: influenzanet/participant-webapp:v1.14.1-0
+    image: influenzanet/participant-webapp:v1.14.5-1
     imagePullPolicy: IfNotPresent
     containerPort: 3100
     serviceName: web-client-service
@@ -177,7 +155,7 @@ svcWebParticipant:
 svcEmailClient:
   name: email-client
   replicas: 1
-  image: influenzanet/email-client-service-image:v1.2.0
+  image: influenzanet/email-client-service-image:v1.3.2
   imagePullPolicy: IfNotPresent
   containerPort: 5005
   serviceName: email-client-service
@@ -196,7 +174,7 @@ svcLogging:
 svcManagementApi:
   name: management-api
   replicas: 1
-  image: influenzanet/management-api-image:v1.2.0
+  image: influenzanet/management-api-image:v1.3.0
   imagePullPolicy: IfNotPresent
   containerPort: 3232      
   corsAllowOrigins: 'https://{{ .Values.domain }}'
@@ -207,7 +185,7 @@ svcManagementApi:
 svcParticipantApi:
   name: participant-api
   replicas: 1
-  image: influenzanet/participant-api-image:v1.2.0
+  image: influenzanet/participant-api-image:v1.3.0
   imagePullPolicy: IfNotPresent
   containerPort: 3231
   corsAllowOrigins: 'https://{{ .Values.domain }}'
@@ -220,7 +198,7 @@ svcParticipantApi:
 SvcMessageScheduler:
   name: messaging-scheduler
   replicas: 1
-  image: influenzanet/messaging-scheduler-image:v1.2.0
+  image: influenzanet/messaging-scheduler-image:v1.3.2
   imagePullPolicy: IfNotPresent
   containerPort: 5009
   serviceName: messaging-scheduler-service
@@ -239,7 +217,7 @@ SvcMessageScheduler:
 svcMessaging:
   name: messaging
   replicas: 1
-  image: influenzanet/messaging-service-image:v1.2.0
+  image: influenzanet/messaging-service-image:v1.3.2
   imagePullPolicy: IfNotPresent
   containerPort: 5004
   serviceName: messaging-service
@@ -250,7 +228,7 @@ svcMessaging:
 svcStudyService:
   name: study
   replicas: 1
-  image: influenzanet/study-service-image:v1.3.1
+  image: influenzanet/study-service-image:v1.5.0
   imagePullPolicy: IfNotPresent
   serviceName: study-service
   containerPort: 5003
@@ -264,7 +242,7 @@ svcStudyService:
 svcUserManagement:
   name: user-management
   replicas: 1
-  image: influenzanet/user-management-image:v1.1.1
+  image: influenzanet/user-management-image:v1.1.1-hotfix-02
   imagePullPolicy: IfNotPresent
   serviceName: "user-management-service"
   containerPort: 5002
