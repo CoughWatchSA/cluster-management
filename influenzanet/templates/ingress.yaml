@@ -1,4 +1,33 @@
 {{- if .Values.ingress.enabled -}}
+{{- if .Values.svcStagingWebParticipant.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.ingress.name }}-staging
+  namespace: {{ .Values.namespace }}
+  annotations:
+{{- if not (eq .Values.issuerType "none") }}
+    cert-manager.io/cluster-issuer: {{ .Values.clusterIssuer }}
+{{- end }}
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: basic-auth
+    nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required'
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+    - secretName: {{ .Values.tlsSecretName }}
+  rules:
+    - host: staging.{{ .Values.domain }}
+      http:
+        paths:
+          - backend: {{ template "ingress.backend" .Values.svcStagingWebParticipant }}
+            path: /(.*)
+            pathType: ImplementationSpecific
+---
+{{- end }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -22,6 +51,9 @@ spec:
     - hosts:
 {{- range concat ( list .Values.domain ) .Values.redirectDomains (.Values.tlsDomains | default ( list ) )}}
       - {{ tpl . $ }}
+{{- end }}
+{{- if .Values.svcStagingWebParticipant.enabled }}
+      - staging.{{.Values.domain}}
 {{- end }}
       secretName: {{ .Values.tlsSecretName }}
   rules:
@@ -79,6 +111,17 @@ spec:
           - backend: {{ template "ingress.backend" .Values.svcManagementApi }}
             path: {{ .Values.managementApiPath }}/(.*)
             pathType: ImplementationSpecific
+{{- if .Values.svcStagingWebParticipant.enabled }}
+    - host: staging.{{ .Values.domain }}
+      http:
+        paths:
+          - backend: {{ template "ingress.backend" .Values.svcParticipantApi }}
+            path: {{ .Values.participantApiPath }}/(.*)
+            pathType: ImplementationSpecific
+          - backend: {{ template "ingress.backend" .Values.svcManagementApi }}
+            path: {{ .Values.managementApiPath }}/(.*)
+            pathType: ImplementationSpecific
+{{- end }}
 {{- if .Values.redirectDomains }}
 ---
 apiVersion: networking.k8s.io/v1

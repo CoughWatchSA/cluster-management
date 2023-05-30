@@ -151,6 +151,21 @@ svcWebParticipant:
     extraVolumeMounts: []
     extraVolumes: []
 
+# STAGING PARTICIPANT WEBAPP
+# if enabled will create a staging copy of web-client named
+# staging-web-client, password protected
+svcStagingWebParticipant:
+    enabled: true
+    name: web-client-staging
+    replicas: 1
+    image: influenzanet/participant-webapp:v1.14.5-1
+    imagePullPolicy: Always
+    containerPort: 3100
+    serviceName: web-client-staging-service
+    # use these for attaching extra volumes to the pods
+    extraVolumeMounts: []
+    extraVolumes: []
+
 # EMAIL CLIENT #
 svcEmailClient:
   name: email-client
@@ -177,7 +192,7 @@ svcManagementApi:
   image: influenzanet/management-api-image:v1.3.0
   imagePullPolicy: IfNotPresent
   containerPort: 3232      
-  corsAllowOrigins: 'https://{{ .Values.domain }}'
+  corsAllowOrigins: 'https://{{ .Values.domain }},https://staging.{{ .Values.domain }}'
   debugMode: "false"
   serviceName: management-api-service
 
@@ -188,7 +203,7 @@ svcParticipantApi:
   image: influenzanet/participant-api-image:v1.3.0
   imagePullPolicy: IfNotPresent
   containerPort: 3231
-  corsAllowOrigins: 'https://{{ .Values.domain }}'
+  corsAllowOrigins: 'https://{{ .Values.domain }},https://staging.{{ .Values.domain }}'
   debugMode: "false"
   useDeleteEndpoint: true
   disableSignupEndpoint: false
