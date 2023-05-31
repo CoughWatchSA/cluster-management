@@ -27,6 +27,30 @@ spec:
             path: /(.*)
             pathType: ImplementationSpecific
 ---
+{{- if (gt (len .Values.basicAuth.excludePaths) 0) }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.ingress.name }}-images-staging
+  namespace: {{ .Values.namespace }}
+  annotations:
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+    - secretName: {{ .Values.tlsSecretName }}
+  rules:
+    - host: staging.{{ .Values.domain }}
+      http:
+        paths:
+          {{- range .Values.basicAuth.excludePaths }}
+          - backend: {{ template "ingress.backend" $.Values.svcStagingWebParticipant }}
+            path: {{ tpl . $ }}
+            pathType: Prefix
+          {{- end }}
+---
+{{ end }}
 {{- end }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
