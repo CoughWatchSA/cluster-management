@@ -220,13 +220,13 @@ SvcMessageScheduler:
   dbTimeout: 30
   dbIdleTimeout: 46
   # Batch Sending Interval for High Priority (seconds)
-  intervalHighPrio: 45
+  intervalHighPrio: 5
   # Batch Sending interval for Low priority messages (seconds)
-  intervalLowPrio: 1800
+  intervalLowPrio: 30
   # Batch Sending interval for Auto messages (seconds)
-  intervalAutoMessage: 120
-  intervalParticipantMessage: 120
-  intervalResearcherNotification: 120
+  intervalAutoMessage: 30
+  intervalParticipantMessage: 30
+  intervalResearcherNotification: 30
 
 # MESSAGING SERVICE #
 svcMessaging:
