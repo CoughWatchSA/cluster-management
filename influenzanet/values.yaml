@@ -158,7 +158,7 @@ svcStagingWebParticipant:
     enabled: true
     name: web-client-staging
     replicas: 1
-    image: coughwatchsa/participant-webapp:v0.0.2-staging
+    image: coughwatchsa/participant-webapp:v0.0.1-staging
     imagePullPolicy: Always
     containerPort: 3100
     serviceName: web-client-staging-service
