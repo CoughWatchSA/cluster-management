@@ -61,7 +61,7 @@ basicAuth:
 
 # Use Google Recaptcha for protecting the registration dialog from spammers, if
 # true the secret googleRecaptchaKey must also be defined
-useRecaptcha: true
+useRecaptcha: false
 
 ##
 # SMTP configuration for outgoing emails
@@ -143,7 +143,7 @@ dbSecretName: "case-mongodb-atlas"
 svcWebParticipant:
     name: web-client
     replicas: 1
-    image: coughwatchsa/participant-webapp:v0.0.4
+    image: coughwatchsa/participant-webapp:v0.0.6
     imagePullPolicy: IfNotPresent
     containerPort: 3100
     serviceName: web-client-service
